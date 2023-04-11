@@ -1,0 +1,207 @@
+---
+title: "money in education"
+author: "Rekik Worku, Pamela Vargas, and Ysatis Tagle"
+date: "12/20/2019"
+output: html_document
+---
+
+```{r}
+
+library(ggplot2)
+library(readxl)
+library(readr)
+
+library(dplyr)
+library(moderndive)
+
+eqschools <- read_csv("final/Dataset.csv")
+
+eqschools <- eqschools %>%
+  mutate(`NEA Reading` = as.numeric(`NEA Reading`))
+
+colnames(eqschools)
+
+eqschools <- eqschools %>% rename(reading = `NEA Reading`, math = `NEA math`, income = `Medium Household Income ($)`, enrollment = `Projected Student Enrollment`, pupil = `Total Per Pupil Spending ($)` )
+```
+
+
+##Money In Education
+##Abstract:
+Looking at per pupil funding hints at the disparity between public schools in the United States and the opportunities that can be available to students. Since public schools are dependent on local property taxes for a considerable amount of their funding, often schools around higher income neighborhoods get more per pupil funding. One way to look at how funding is distributed is through the average household income of residents in each state.  So for the project, the purpose is to see if state per pupil funding and average household income of students have a relationship with students’ performance on standardized tests.
+
+##Introduction:.
+Increased spending on education leads to academic progress in students. When states provide equitable per pupil funding in their public schools, student achievement levels tend to rise and this is true especially for low-income students (Martin, 2018). Inequity in funding can potentially impact factors like class retention rates, the classes that are being taught in schools (having advanced or college-preparedness courses), and schools’ ability to hire and keep good teachers to educate and mentor students. For the project, the primary research question is to see if per pupil funding and the average household income of residents impact students’ performance on standardized tests.  Since the entire United States is taken into consideration, NAEP/NEA Math and English/Language Arts (ELA) scores provided by the National Assessment of Educational Progress (N.A.E.P.) were used for the standardized tests. N.A.E.P. provides the “only assessment that measures what students know and can do in various subjects across the nation, states, and in some urban districts” (“About NAEP”). Every different state has its own standardized test for graduation requirements, but this standardized test allows someone to get a sense of students' progress on standardized tests between states. If increased spending on education leads to improvement in student performance, it would be interesting to look at how impactful per pupil funding and the average household income of residents can be on students’ performance on standardized tests.
+
+##Data: 
+The data was extracted from the National Center for Education Statistics and 2015 Annual Survey of School System Finances, U.S Census Bureau. Because the project is focused on the year 2015, our data only includes test scores, average median household income, and state per-pupil funding from that year. The cases are the 50 states + District of Columbia which is a categorical variable. The response variables are the average test scores for math and reading. The explanatory variables are median household income and per-pupil spending. The response and explanatory variables are all continuous quantitative variables. The last variable is the project student enrollment, a discrete quantitative variable. None of the variables that were used could have been controlled.
+
+##Methods: 
+First, we made on r studio a five summary statistics table for the five variables. Secondly, we created residuals histograms of each variable using R studio. We also generated scatterplots to show the relationship between our explanatory and response variables; the relationship between the medium household income and average NEA math/reading score and the relationship between the average state per-pupil funding and average NEA math/ reading score. We created simple linear regression graphs by running a linear model on R studio. The simple linear regression graphs to show the relationship between the median household income and average NEA math/ reading score, and the relationship between the average state per-pupil funding and average NEA math/reading score. Since there was some sort of relationship amongst the variables, a multiple regression model was used based on the relationships given from the linear regression graphs that were created, which gave us an F hypothesis test analysis. The F hypothesis test analysis resulted from the p-value given from the regression model.
+##Basic descriptive statistics/summary statistics: 
+
+```{r}
+summary(eqschools,)
+```
+
+
+The summary statistics data table shows the distributions of the five variables: total per-pupil spending, projected student enrollment, median household income, NEA reading score, and NEA math score. It is important to draw attention to the interquartile range for the NEA Reading scores, which show a difference of 9 points. This means that 50 percent of the data is fairly homogeneous compared to the lower twenty-five percent of data haws a spread of 30 points. Because of the way this data is spread between the quartiles, there were a lot of outliers that drastically impacted the results. The distribution of the NEA Reading scores is similar to the NEA Math score. The NEA Math score has an interquartile range of nine points, yet the lower twenty-five percent of data has a spread of 31 points. The distribution of the Median Household Income, the distribution of pupil spending, and the distribution of the projected student enrollment are all nearly right-skewed.
+
+
+##Results: 
+
+
+#**Results**#
+
+To address the question, we first ran simple linear regression graphs in order to observe the relationship between two chosen variables. We did this by adding a regression line so we can see the variability in the spread of the data. 
+
+##Simple linear regression graphs##
+```{r}
+
+ggplot(data = eqschools, aes(y = reading, x = income)) + 
+  geom_point() + 
+  geom_jitter() +
+    geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Median Household Income", 
+       y = "NEA Reading scores", 
+       title = "Househould Income and Pupil Scores on Reading") 
+
+ggplot(data = eqschools, aes(y = math, x = income)) + 
+  geom_point() + 
+  geom_jitter() +
+    geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Median Household Income", 
+       y = "NEA Math scores", 
+       title = "Household Income and Pupil Scores on Math")
+
+ggplot(data = eqschools, aes(y = reading, x = pupil)) + 
+  geom_point() + 
+  geom_jitter() +
+    geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Total per Pupil Spending", 
+       y = "NEA Reading scores", 
+       title = "Pupil Spending and Pupil Scores on Reading") 
+
+ggplot(data = eqschools, aes(y = math, x = pupil)) + 
+  geom_point() + 
+  geom_jitter() +
+    geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Total per Pupil Spending", 
+       y = "NEA Math scores", 
+       title = "Pupil Spending and Pupil Scores on Math") 
+
+```
+
+The plots do suggest a relationship, however, there are signifigant outliers to each plot. The plots crafted from the reading scores had more variability than that of the math scores. On the median household income graphs, the lowest outlier in Louisiana. The two highest outliers on median household income were Kansas and Pennsylvania. For per pupil spending, the outliers were the same, but they just shifted along the X axis. 
+
+##Models##
+```{r}
+model_schools_house_reading <- lm(reading ~ income, data=eqschools)
+model_schools_house_math <- lm(math ~ income, data=eqschools)
+model_schools_pupil_reading <- lm(reading ~ pupil, data=eqschools)
+model_schools_pupil_math <- lm(math ~ pupil, data=eqschools)
+```
+
+##Assessing conditions##
+
+In order to see if the multiple linear regression model would work for our dataset, we need to check if our model meets the conditions. We can do that by plotting the residuals and assessing normality of our distribution. 
+
+##Residuals##
+```{r}
+
+regression_house_reading <- get_regression_points(model_schools_house_reading)
+
+ggplot(regression_house_reading, aes(x = reading_hat, y = residual))+ 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0, color = "red") + 
+  labs(title = "Residual versus Fitted plot for Median Household Income and Reading")
+
+regression_house_math <- get_regression_points(model_schools_house_math)
+
+ggplot(regression_house_math, aes(x = math_hat, y = residual))+ 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0, color = "red") + 
+  labs(title = "Residual versus Fitted plot for Median Household Income and Math")
+
+regression_pupil_reading <- get_regression_points(model_schools_pupil_reading)
+
+ggplot(regression_pupil_reading, aes(x = reading_hat, y = residual))+ 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0, color = "red") + 
+  labs(title = "Residual versus Fitted plot for Per Pupil Spending and Reading")
+
+regression_pupil_math <- get_regression_points(model_schools_pupil_math)
+
+ggplot(regression_pupil_math, aes(x = math_hat, y = residual))+ 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0, color = "red") + 
+  labs(title = "Residual versus Fitted plot for Per Pupil Spending and Math")
+
+
+```
+
+While there are still outliers present in our model, we can see that there isn't a systemic pattern with our residuals. We can see that there is some independence within our model, and it is somewhat linear. 
+
+##Normality##
+```{r}
+
+ggplot(regression_house_math, aes(x = residual)) + 
+  geom_histogram(fill = "steelblue", color = "white", 
+                 binwidth = 5) + 
+  labs("Distribution of Residuals for household income and math")
+
+ggplot(regression_house_reading, aes(x = residual)) + 
+  geom_histogram(fill = "darkorange2", color = "white", 
+                 binwidth = 5) + 
+  labs("Distribution of Residuals for household income and reading")
+
+ggplot(regression_pupil_math, aes(x = residual)) + 
+  geom_histogram(fill = "deeppink2", color = "white", 
+                 binwidth = 5) + 
+  labs("Distribution of Residuals for per pupil spending and math")
+
+ggplot(regression_pupil_reading, aes(x = residual)) + 
+  geom_histogram(fill = "darkolivegreen4", color = "white", 
+                 binwidth = 5) + 
+  labs("Distribution of Residuals for per pupil spending and reading")
+```
+
+In checking the normality of our distribution, we can still see outliers, a lack of symmetry and a heavy skew left for all our data. 
+
+Our dataset is not exceptional for the multiple regression model. It challenges assumptions of normality and few outliers within the dataset, but, due to the fact that we have more than 30 cases, we can continue to use the data, as long as we do not make any brash assumptions. 
+
+##Multiple regression##
+
+Now, we can run the multiple regression models. 
+
+```{r}
+
+#Regression model for house income and math
+summary(model_schools_house_math)
+
+#Regression model for house income and reading
+summary(model_schools_house_reading)
+
+#Regression model for per pupil spending and math
+summary(model_schools_pupil_math)
+
+#Regression model for per pupil and reading
+summary(model_schools_pupil_reading)
+
+```
+
+All of our models were not statistically significant, as our significance level is .05 and our P-values are all higher. The model with the lowest P-value is the reading/per pupil model, but it is not low enough to reject the null. All our math models were slightly above 30 cases, as shown by the degrees of freedom which is the minimum number of cases we would need for these models to be valid. However, the reading models remained above 40, which keeps the models accurate. We also see very low, nearing 0, r^2 values. 
+
+##Discussion/Conclusion: 
+The results did not reveal much. The results do not confirm whether there is or isn’t a relationship between the average household income, per pupil spending, and student performance. There might be a relationship as shown in the linear model charts, but the multiple regression results do not confirm that. It is a bit surprising to think that the results would not show a relationship, as it is well known that there is a disparity between school funding and student performance in the United States. However, the data chosen may just not reflect that. The biggest limitations in this study is the number of cases, as that is what has led to a lack of confidence in the results. Some things to add include: filling the not available values within the results so there would more observations, test scores and funding from another time so change over time can be observed. Some questions raised include: How does this study apply to districts? How does this study look in other countries? How does this study look focusing on high schoolers? 
+
+
+##References:
+“About NAEP.” The National Center for Education Statistics (NCES) Home Page, a Part of the U.S. Department of Education, nces.ed.gov/nationsreportcard/about/.
+Camera, Lauren. “In Most States, the Poorest School Districts Get Less Funding.” U.S. News & World Report, U.S. News & World Report, 27 Feb. 2018, www.usnews.com/news/best-states/articles/2018-02-27/in-most-states-poorest-school-districts-get-less-funding.
+Chingos, Matthew, and Kristin Blagg. “Making Sense of State School Funding Policy.” Making Sense of State School Funding Policy, 2017.
+“Federal Role in Education” Home, US Department of Education (ED), 25 May 2017, www2.ed.gov/about/overview/fed/role.html.
+Governing. (2018, June 1). Education Spending Per Student by State. Retrieved November 3, 2019, from https://www.governing.com/gov-data/education-data/state-education-spending-per-pupil-data.html.
+Martin, Carmel, et al. “A Quality Approach to School Funding.” Center for American Progress, 18 Nov. 2018, www.americanprogress.org/issues/education-k-12/reports/2018/11/13/460397/quality-approach-school-funding/.
+10, et al., “Poverty and School Funding: Why Low-Income Students Often Suffer.” The Edvocate, 15 Jan. 2017, www.theedadvocate.org/poverty-and-school-funding-why-low-income-students-often-suffer/.
+
+
